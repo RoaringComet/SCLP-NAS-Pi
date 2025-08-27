@@ -1,0 +1,15 @@
+# Auto-Mount Explained
+
+The purpose of **auto-mount scripts** is to automatically connect your Windows system to the Raspberry Pi NAS share at every boot or login, so you don’t need to manually map the drive each time.
+
+## How It Works
+1. A batch script (`automount-nas.bat`) contains the `net use` command with your NAS details.
+2. The script is placed in the Windows **Startup folder**, or set as a scheduled task, so it runs when the computer starts or the user logs in.
+3. Windows connects the network drive and assigns it a drive letter (e.g., `Z:`).
+
+## Why Auto-Mount?
+- Saves time → no need to re-enter credentials.
+- Ensures applications can always find the NAS files at the same drive letter.
+- Improves workflow for backups, media libraries, or shared development projects.
+
+---
