@@ -1,0 +1,44 @@
+# Samba User Management
+
+## Step 1: Ensure system user exists
+# (use your main Pi user, e.g., `pi`, or create a dedicated NAS user)
+```bash
+sudo adduser nasuser
+Step 2: Set Samba password for the user
+This is separate from the system password
+bash
+Copy code
+sudo smbpasswd -a nasuser
+Enable the user for Samba access
+bash
+Copy code
+sudo smbpasswd -e nasuser
+Step 3: Verify Samba user list
+bash
+Copy code
+sudo pdbedit -L
+Output example:
+pi:1000:Pi User
+nasuser:1001:NAS User
+yaml
+Copy code
+
+---
+
+## Step 4: (Optional) Create dedicated folders per user
+```bash
+mkdir -p /mnt/nas/nasuser
+sudo chown -R nasuser:nasuser /mnt/nas/nasuser
+Notes
+System users ≠ Samba users.
+
+A Samba user must exist in both system (/etc/passwd) and Samba (smbpasswd).
+
+Samba user password may differ from system password.
+
+yaml
+Copy code
+
+---
+
+Shall I go ahead and write **`smb.conf`** (the actual share configuration file) next?
