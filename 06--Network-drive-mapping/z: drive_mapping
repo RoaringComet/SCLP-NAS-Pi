@@ -1,1 +1,53 @@
+# Z-Drive Mapping
+
+This document explains how the Samba share hosted on the Raspberry Pi was mapped to the **Z:** drive in Windows.
+
+---
+
+## Steps Performed
+
+1. **Locate the Samba Share**
+   - Pressed `Win + R` on Windows.
+   - Entered:
+     ```
+     \\<Pi_IP_Address>\SoumyadeepNASPi
+     ```
+   - Example:
+     ```
+     \\192.168.0.xxx\SoumyadeepNASPi
+     ```
+
+2. **Authenticate**
+   - A login prompt appeared.
+   - Entered the **Samba username** and **password** configured earlier on the Pi.
+   - On successful authentication, the NAS share opened in File Explorer.
+
+3. **Map as Network Drive**
+   - Opened **File Explorer** → Right-clicked **This PC** → Selected **Map Network Drive...**
+   - Chose **Drive letter:** `Z:`
+   - Entered the folder path:
+     ```
+     \\<Pi_IP_Address>\SoumyadeepNASPi
+     ```
+   - Checked the box **Reconnect at sign-in** (optional but recommended).
+   - Clicked **Finish**.
+
+4. **Result**
+   - The Samba share now appears as a **Z:** drive in File Explorer.
+   - Files can be read and written directly like any local disk.
+   - Example screenshot structure:
+     ```
+     Z:\
+     ├── Documents
+     ├── Media
+     └── Backups
+     ```
+
+---
+
+## Notes
+- If authentication fails, ensure the Samba username and password match what was created on the Raspberry Pi.  
+- If the drive does not reconnect automatically, see **drive-persistence.md**.
+
+---
 
