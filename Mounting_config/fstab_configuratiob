@@ -1,0 +1,243 @@
+# fstab Configuration Guide
+
+## Overview
+The `/etc/fstab` file ensures your external drive mounts automatically at boot with the correct permissions. This prevents the "Access Denied" errors from returning after system reboots.
+
+## What is fstab?
+- **Purpose**: File System Table - defines how disk partitions mount at boot
+- **Location**: `/etc/fstab`
+- **Critical**: One syntax error can prevent system boot
+- **Format**: Space or tab-separated values
+
+## Our fstab Configuration
+
+### Complete File Contents
+```bash
+proc            /proc           proc    defaults          0       0
+PARTUUID=765b8b04-01  /boot/firmware  vfat    defaults          0       2
+PARTUUID=765b8b04-02  /               ext4    defaults,noatime  0       1
+# a swapfile is not a swap partition, no line here
+#   use  dphys-swapfile swap[on|off]  for that
+/dev/sda2 /sonunas exfat uid=1001,gid=1001,umask=002 0 0
+```
+
+### Our NAS Entry Breakdown
+```
+/dev/sda2 /sonunas exfat uid=1001,gid=1001,umask=002 0 0
+```
+
+| Field | Value | Purpose |
+|-------|-------|---------|
+| **Device** | `/dev/sda2` | External drive partition |
+| **Mount Point** | `/sonunas` | Where it appears in file system |
+| **File System** | `exfat` | Type detected by `blkid` |
+| **Options** | `uid=1001,gid=1001,umask=002` | Permission settings |
+| **Dump** | `0` | No backup needed |
+| **Pass** | `0` | No file system check |
+
+## Configuration Evolution
+
+### What We Started With (Problematic)
+```bash
+/dev/sda2       /sonunas        auto    defaults        0       2
+```
+**Problems:**
+- `auto` ignored our UID/GID requirements
+- `defaults` used root ownership
+- `0 2` tried to run fsck on exFAT (not supported)
+
+### What We Fixed To
+```bash
+/dev/sda2 /sonunas exfat uid=1001,gid=1001,umask=002 0 0
+```
+**Improvements:**
+- Explicit `exfat` file system type
+- Proper `uid=1001,gid=1001` for soumyadeep user
+- Correct `umask=002` for 775 permissions
+- `0 0` prevents fsck attempts
+
+### Syntax Error We Fixed
+**Corrupted line:**
+```bash
+/dev/sda2 /sonunas exfat uid=1001,gid=1001,umask=002 0 proc            /proc           proc    defaults          0       0
+```
+**Problem:** Missing final `0` got merged with next line
+
+**Fixed:**
+```bash
+/dev/sda2 /sonunas exfat uid=1001,gid=1001,umask=002 0 0
+proc            /proc           proc    defaults          0       0
+```
+
+## Field Details
+
+### 1. Device (/dev/sda2)
+```bash
+# Find your device
+lsblk
+sudo blkid
+```
+- Use specific partition (`sda2`), not whole disk (`sda`)
+- Can also use UUID for reliability: `UUID=62CC-A86F`
+
+### 2. Mount Point (/sonunas)
+```bash
+# Create if doesn't exist
+sudo mkdir /sonunas
+```
+- Must exist before mounting
+- Should be empty directory
+- Use consistent naming
+
+### 3. File System (exfat)
+```bash
+# Check file system type
+sudo blkid /dev/sda2
+```
+- Must match actual file system
+- Common types: `ntfs-3g`, `exfat`, `vfat`, `ext4`
+
+### 4. Mount Options
+```
+uid=1001,gid=1001,umask=002
+```
+
+#### UID/GID Selection
+```bash
+# Find your Samba user's ID
+id soumyadeep
+# Output: uid=1001(soumyadeep) gid=1001(soumyadeep)
+```
+
+#### Umask Explanation
+- **umask=002**: Files get 775 (rwxrwxr-x), Directories get 775 (rwxrwxr-x)
+- **umask=000**: Files get 777 (rwxrwxrwx), Directories get 777 (rwxrwxrwx)
+- **umask=022**: Files get 755 (rwxr-xr-x), Directories get 755 (rwxr-xr-x)
+
+### 5. Dump Field (0)
+- **0**: Don't backup with `dump` command
+- **1**: Include in backups
+- Most systems don't use dump anymore
+
+### 6. Pass Field (0)
+- **0**: Don't run file system check (`fsck`)
+- **1**: Check first (root file system only)
+- **2**: Check after root file system
+- exFAT doesn't support fsck, so use 0
+
+## Testing fstab Changes
+
+### 1. Backup Original
+```bash
+sudo cp /etc/fstab /etc/fstab.backup
+```
+
+### 2. Edit Carefully
+```bash
+sudo nano /etc/fstab
+```
+
+### 3. Test Before Reboot
+```bash
+# Unmount first
+sudo umount /sonunas
+
+# Test mount from fstab
+sudo mount -a
+```
+
+### 4. Verify Mount
+```bash
+mount | grep sonunas
+ls -la /sonunas
+```
+
+### 5. Test File Creation
+```bash
+sudo -u soumyadeep touch /sonunas/fstab-test.txt
+ls -la /sonunas/fstab-test.txt
+```
+
+## System Integration
+
+### Reload systemd
+```bash
+sudo systemctl daemon-reload
+```
+
+### Restart Samba Services
+```bash
+sudo systemctl restart smbd
+sudo systemctl restart nmbd
+```
+
+## Alternative Mount Methods
+
+### Using UUID (More Reliable)
+```bash
+# Find UUID
+sudo blkid /dev/sda2
+# Output: UUID="62CC-A86F"
+
+# fstab entry
+UUID=62CC-A86F /sonunas exfat uid=1001,gid=1001,umask=002 0 0
+```
+
+### Using LABEL
+```bash
+# Find label
+sudo blkid /dev/sda2
+# Output: LABEL="My Book"
+
+# fstab entry
+LABEL="My Book" /sonunas exfat uid=1001,gid=1001,umask=002 0 0
+```
+
+## Troubleshooting
+
+### Parse Errors
+```bash
+mount: /etc/fstab: parse error at line X
+```
+**Solutions:**
+- Check for missing spaces/tabs
+- Verify no merged lines
+- Count fields (should be 6)
+
+### Mount Fails
+```bash
+mount: wrong fs type, bad option, bad superblock
+```
+**Solutions:**
+- Verify file system type with `blkid`
+- Check if device exists with `lsblk`
+- Ensure mount point directory exists
+
+### Permission Issues
+```bash
+touch: cannot touch '/sonunas/test.txt': Permission denied
+```
+**Solutions:**
+- Verify UID matches your user: `id username`
+- Check mount options: `mount | grep sonunas`
+- Confirm file ownership: `ls -la /sonunas`
+
+## Security Notes
+
+### Current Configuration Security
+- ✅ **User-specific**: Only UID 1001 has full access
+- ✅ **Group access**: GID 1001 group members have access
+- ✅ **Others limited**: Read/execute only for others
+- ✅ **Local only**: Physical access required to modify fstab
+
+### Production Considerations
+- Consider using UUID instead of device names
+- Monitor mount failures: `systemctl status systemd-remount-fs`
+- Regular backups of working fstab configuration
+
+## Next Steps
+After fstab is configured:
+1. Test automatic mounting with reboot
+2. Verify Samba still works after auto-mount
+3. Test client connections (Windows, Android)
+4. Monitor system logs for mount issues
