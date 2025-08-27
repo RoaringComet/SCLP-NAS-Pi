@@ -1,1 +1,26 @@
+# Initial Boot Configuration
+
+## Step 1: Physical Setup
+- Insert the prepared SD card into the Raspberry Pi.
+- Connect the Raspberry Pi to a reliable power source.
+- For **headless setup**:
+  - No monitor, keyboard, or mouse required.
+  - Pi will automatically attempt to connect to the configured Wi-Fi.
+
+## Step 2: Network and SSH Access
+- Once powered on, the Raspberry Pi will boot and join the Wi-Fi network set in Raspberry Pi Imager.
+- To locate the Pi:
+  - Use your router's connected device list to find the hostname (e.g., `pi-main`).
+  - Alternatively, use a network scanner like `Advanced IP Scanner` or `nmap`.
+- Connect via SSH:
+  - Open a terminal (Linux/Mac) or PowerShell (Windows).
+  - Run `ssh username@hostname.local`  
+    Example: `ssh pi@pi-main.local`
+  - Enter the password you configured during flashing.
+
+## Step 3: First Login Checks
+- After logging in, verify system details:
+  - Run `hostname` to confirm device name.
+  - Run `ifconfig` or `ip a` to confirm Wi-Fi connection.
+- Update the package list (to be done later in SSH setup section).
 
