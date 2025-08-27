@@ -1,1 +1,18 @@
+# 03--ssh--setup/ssh--explained.md
+
+# SSH Explained
+
+SSH (Secure Shell) is a protocol that allows secure remote login and command execution.  
+For the Raspberry Pi, it is the main method of accessing the system headlessly.
+
+- **Encryption** → prevents others from reading traffic.  
+- **Authentication** → password or SSH keys verify the user.  
+- **Port** → default is TCP 22.  
+
+You can use SSH to:
+- Manage files
+- Install software
+- Run scripts
+- Monitor system health
+
 
