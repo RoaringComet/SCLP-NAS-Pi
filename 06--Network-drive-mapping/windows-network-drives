@@ -1,0 +1,99 @@
+Windows Network Drives
+
+This guide explains different ways to access and map a Samba share from a Raspberry Pi (or any NAS) on Windows.
+
+Example UNC path:
+
+\\192.168.0.105\SoumyadeepNASPi
+
+
+Server_IP → The IP address or hostname of the Raspberry Pi.
+
+Share_Name → The Samba share you created (e.g., SoumyadeepNASPi).
+
+Methods to Access Network Drives
+1. Direct Access (Run Menu / Explorer)
+
+Press Win + R → type:
+
+\\<Pi_IP_Address>\<Share_Name>
+
+
+Hit Enter.
+
+Enter Samba username and password if prompted.
+
+The folder opens in Explorer (temporary access).
+
+[screenshot: run-menu-access]
+
+2. Map Network Drive (GUI)
+
+Open This PC → click Map network drive (top ribbon).
+
+Choose a drive letter (e.g., Z:).
+
+Enter path:
+
+\\<Pi_IP_Address>\<Share_Name>
+
+
+Enter Samba credentials → Done.
+
+The share now appears as a permanent drive in Explorer.
+
+[screenshot: mapping-drive]
+
+3. Command Prompt (net use)
+
+Run in CMD:
+
+net use Z: \\<Pi_IP_Address>\<Share_Name> /user:<smb_username>
+
+
+Example:
+
+net use Z: \\192.168.0.105\SoumyadeepNASPi /user:soumyadeep
+
+
+Prompts for password.
+
+Mounts the share as Z:.
+
+[screenshot: cmd-mapping]
+
+4. PowerShell (New-PSDrive)
+
+Run in PowerShell:
+
+New-PSDrive -Name "Z" -PSProvider FileSystem -Root "\\<Pi_IP_Address>\<Share_Name>" -Credential (Get-Credential) -Persist
+
+
+Prompts for Samba username & password.
+
+Mounts as Z: (persistent if -Persist is used).
+
+[screenshot: powershell-mapping]
+
+Authentication Notes
+
+Username = Samba user you created on Pi (e.g., soumyadeep).
+
+Password = The Samba password set with smbpasswd.
+
+You can save credentials using Windows Credential Manager (see drive-persistence.md
+).
+
+Common Issues
+
+Wrong username/password → Ensure Samba user exists:
+
+sudo smbpasswd -a <username>
+
+
+Share not found → Verify Pi is online and Samba service is running:
+
+sudo systemctl status smbd
+
+
+Firewall blocking → Make sure ports 445 and 139 are open on the Pi.
