@@ -1,0 +1,24 @@
+# Security Guide for Raspberry Pi NAS
+
+## 1. User Management
+- Use dedicated Samba users for each client.
+- Avoid default 'pi' for Samba shares.
+
+## 2. SSH Security
+- Enable public key authentication, disable password login for remote access.
+- Change default Pi password.
+
+## 3. File Permissions
+- Apply proper masks:
+  - create mask: 0660
+  - directory mask: 0770
+- Limit share access to valid users only.
+
+## 4. Network Security
+- Firewall rules: allow only SMB ports internally.
+- Disable unused services.
+- Keep system updated:
+```bash
+sudo apt update && sudo apt full-upgrade -y
+yaml
+Copy code
