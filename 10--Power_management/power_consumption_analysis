@@ -1,0 +1,17 @@
+# Power Consumption Analysis  
+
+Analyzing power draw helps in optimizing NAS performance and planning UPS/battery backup.  
+
+## Observations  
+- **Raspberry Pi 4B:** ~3–7W (depends on CPU load and peripherals).  
+- **External HDD (3.5” with adapter):** ~6–10W.  
+- **Idle vs Load:**  
+  - Idle NAS (Pi + HDD) ≈ 6–8W.  
+  - File transfers (high load) ≈ 12–15W.  
+
+## Why Analysis Matters  
+1. **Cost Efficiency** – Lower electricity bills with optimized configurations.  
+2. **Backup Planning** – Determines UPS capacity for uninterrupted access.  
+3. **Thermal Safety** – High consumption often correlates with heat spikes.  
+
+**Tip:** Use `vcgencmd measure_volts` and `vcgencmd measure_temp` on Raspberry Pi to correlate voltage, power draw, and temperature.  
