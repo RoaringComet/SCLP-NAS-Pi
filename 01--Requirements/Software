@@ -1,1 +1,56 @@
+# Software Requirements & Downloads
 
+This NAS uses Raspberry Pi OS + Samba for Windows-friendly file sharing. Below are the tools and packages you need, with short explanations and install commands.
+
+---
+
+## 1) Imaging & Setup Tools (on your PC)
+
+- Raspberry Pi Imager – to flash Raspberry Pi OS to microSD.  
+  - Features: set hostname, Wi-Fi/Ethernet, username/password, and enable SSH before first boot.
+- SSH client  
+  - Windows 10/11: built-in OpenSSH (PowerShell: `ssh pi@<ip>`).  
+  - Optional: PuTTY if you prefer a GUI.
+
+---
+
+## 2) Operating System (for the Pi, on your PC)
+
+- Raspberry Pi OS with desktop (32-bit) is recommended (headless server, minimal overhead).[ https://downloads.raspberrypi.com/raspios_armhf/images/raspios_armhf-2025-05-13/2025-05-13-raspios-bookworm-armhf.img.xz ]
+- First boot configuration:
+  - Set hostname (e.g., `raspberrypi`).
+  - Enable SSH.
+  - Configure locale/timezone.
+  - Ensure Ethernet is plugged to router/switch.
+// we will be discussing setup later dont worry :)
+
+---
+
+## 3) Advanced IP scanner (on your PC)
+- you will need to scan your local network after setting up your pi.
+- setting up means - inserting SD card post flashing onto the Pi and connecting it to power and WiFi over Ethernet.
+
+---
+
+## 4) Powershell (on your windows PC)
+- default scripting language to access and setup the Pi.
+
+## 5) Core Packages (on the Pi, via windows power shell)
+
+After first boot (via SSH), update and install:
+
+```bash
+sudo apt update && sudo apt full-upgrade -y
+
+# File sharing (SMB/CIFS)
+sudo apt install -y samba samba-common
+
+# Useful filesystem tools (exFAT support, if you use exFAT disks)
+sudo apt install -y exfat-fuse exfatprogs
+
+# Diagnostics & health
+sudo apt install -y htop iotop smartmontools hdparm lshw
+
+# Convenience
+sudo apt install -y nano vim git curl wget
+// we will discuss this setup later as well :)
