@@ -1,0 +1,32 @@
+Discovering and Generating SSH Keys
+
+SSH keys allow secure, passwordless authentication between your Windows machine and the Raspberry Pi NAS.
+Before setting up passwordless login, you need to check if an SSH key already exists on your system.
+
+Step 1: Check if an SSH key exists
+
+Open PowerShell or Command Prompt.
+
+Run:
+
+dir %userprofile%\.ssh
+
+
+If you see files like id_rsa and id_rsa.pub, you already have a key pair.
+
+Step 2: Generate a new SSH key (if none exists)
+
+Run:
+
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+
+When asked for file location, press Enter to accept default (C:\Users\<YourName>\.ssh\id_rsa).
+
+When asked for passphrase, leave blank (for automation).
+
+Now you have two files:
+
+id_rsa (private key — keep safe)
+
+id_rsa.pub (public key — share with Raspberry Pi)
