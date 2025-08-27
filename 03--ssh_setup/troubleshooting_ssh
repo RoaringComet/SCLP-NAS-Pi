@@ -1,0 +1,126 @@
+# Troubleshooting SSH
+
+This section lists common SSH issues faced during Raspberry Pi setup and their solutions.  
+
+---
+
+## 1. Permission Denied (Password)
+**Problem:**  
+While connecting with:
+```bash
+ssh pi@<your Pi IP>
+it repeatedly asked for password but access was denied.
+
+Cause:
+
+Wrong password typed.
+
+Username not matching (pi vs custom user).
+
+SSH service not running.
+
+Fix:
+
+Confirm correct username and password used during flashing.
+
+Ensure SSH service is active:
+
+bash
+Copy code
+sudo systemctl status ssh
+Re-enable SSH if disabled:
+
+bash
+Copy code
+sudo systemctl enable ssh --now
+2. SSH Config File Missing
+Problem:
+I created userconf or SSH config files earlier but couldn’t find them later.
+
+Cause:
+
+Files not created in the right boot partition.
+
+Files deleted after first boot (Pi consumes them).
+
+Fix:
+
+Recreate the file in the boot partition before first boot:
+
+text
+Copy code
+ssh   (empty file to enable SSH)
+userconf   (for custom username/password if needed)
+If already booted, manually enable SSH:
+
+bash
+Copy code
+sudo raspi-config
+→ Interfacing Options → SSH → Enable
+
+3. Connection Refused
+Problem:
+Tried ssh pi@<your Pi IP> but got:
+
+text
+Copy code
+ssh: connect to host <your Pi IP> port 22: Connection refused
+Cause:
+
+SSH service not installed or disabled.
+
+Firewall blocking port 22.
+
+Fix:
+
+Enable SSH:
+
+bash
+Copy code
+sudo raspi-config
+Check firewall rules:
+
+bash
+Copy code
+sudo ufw allow 22
+4. Wrong IP Address
+Problem:
+SSH failed because <your Pi IP> was not correct.
+
+Fix:
+
+Find correct IP:
+
+bash
+Copy code
+hostname -I
+Or from router admin page.
+
+Reconnect using the correct one:
+
+bash
+Copy code
+ssh pi@<your Pi IP>
+5. Key Authentication Not Working
+Problem:
+After setting up keys, SSH still asked for password.
+
+Cause:
+
+Wrong permissions on .ssh folder.
+
+Public key not copied correctly.
+
+Fix:
+
+Set proper permissions:
+
+bash
+Copy code
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+Re-copy key:
+
+bash
+Copy code
+ssh-copy-id pi@<your Pi IP>
