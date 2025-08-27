@@ -1,0 +1,10 @@
+I will describe the steps involved in accessing the NAS by a smartphone using a 3rd party app below-
+
+  1. Go to playstore(in android) , and download the app " cx file explorer ".
+  2. Open the app and give all the necessary permissions it needs including notifications and device storage access.
+  3. Go to ' Networks '
+  4. Select ' New location '
+  4. Select ' remote ' than ' SMB '
+  5. Enter Rapberry IP in hostname, SAMBA username and password (/ ALERT this is your security of NAS , be extremely careful with these credentials)
+  6. Press ' OK '
+You are in , now you can read and write in the NAS via this waypoint.
