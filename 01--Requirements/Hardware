@@ -1,1 +1,74 @@
+# Hardware Requirements & Options
+
+This document lists the recommended hardware for a reliable, quiet, low-power Raspberry Pi NAS. It also explains upgrade paths and trade-offs so you can choose based on budget and performance.
+
+---
+
+## 1) Core Components
+
+| Component | Recommendation | Why it matters | Notes | My choice |
+|---|---|---|---|
+| Raspberry Pi | Pi 4 (4GB) /(8GB) | Gigabit Ethernet + enough RAM for file caching | ; Pi 4 is affordable and sufficient for SMB workloads. | raspberry Pi 4 model B |
+| Power Supply | Official PSU (Pi 4: 5V/3A) / 20W mobile charger type C | Stable power prevents random reboots & SD corruption | Avoid cheap adapters and long/poor cables. | Realme 20 W phone charger |
+| microSD Card | 16GB (from any good brand) | OS & logs; endurance cards last longer |  Geonix 16GB SD card |
+| Storage | preferrably HDD (NAS grade) | Capacity & reliability | SSD = silent & shock-proof; HDD = best price per TB. For Pi 5, NVMe via M.2 HAT is an option. | Kingster ! TB HDD |
+| USB–SATA Enclosure | USB 3.0 UASP-capable | Lower CPU load, higher throughput | Look for ASM1153E/JMS578/JMS581 controllers with UASP. | Type C to type C |
+| Ethernet | Cat5e/6 cable to router/switch | Stable gigabit link | Wired strongly preferred over Wi-Fi for NAS. | Amazon basics 3m Ethernet cable |
+| SD card reader | any good reader | flashing the OS onto Pi | Portonics SD card reader
+
+Tip: If you already use an external USB drive formatted exFAT, you can keep it. For the best Linux permissions and resiliency, consider migrating to ext4 later.
+
+---
+
+## 2) Optional but Recommended
+
+| Accessory | Use Case | Notes | Did i use (Y/N)
+|---|---|---|
+| Case with cooling | Sustained transfers | Passive aluminum or a small fan prevents thermal throttling. | N
+| Powered USB hub | Multiple drives / 3.5" enclosures | Reduces power draw from the Pi. | N
+| Heatsinks | Quiet cooling | Especially for Pi 4 under load. | Y
+
+---
+
+## 3) Capacity & Performance Planning
+
+- Throughput expectations (realistic)  
+  - Pi 4 + good USB 3.0 enclosure: ~70–110 MB/s over SMB (wired).  
+  - Pi 4 + good USB 3.0 enclosure: ~20 MB/s over SMB (wireless client to server).  
+  - Pi 5 + NVMe: ~100–120+ MB/s (often saturates gigabit with large files).
+- Workloads  
+  - Large media files → HDD is cost-effective.  
+  - Many small files → SSD/NVMe feels much faster.  
+- Noise/Heat  
+  - SSD/NVMe are silent;  HDDs may need better airflow.
+
+---
+
+## 4) Bill of Materials (example)
+
+- Raspberry Pi 4 Model B (4GB)  ₹ 7k-8k
+- Official Raspberry Pi PSU  ₹ 800
+- 16GB microSD (high endurance)  ₹ 500
+- USB 3.0 UASP SATA enclosure +  1TB SSD  ₹ 3k-5k
+- Cat6 Ethernet cable  ₹ 300
+- Low-profile case with heatsinks/fan  ₹ 1k
+- SD card reading Device ₹500
+
+---
+
+## 5) Risks & Mitigations
+
+- SD card wear → Use high-endurance cards; move heavy logs/caches off SD when possible.  
+- Power drops → Use a UPS or shut down cleanly before cutting power.  
+- Thermal throttling → Add cooling; check temps under load.  
+- USB enclosure quirks → Prefer well-known UASP chipsets; update firmware if available.  
+
+---
+
+## 6) Future Upgrades
+
+- Add a second drive for backups (to a different device or off-site).  
+- Migrate external drive from exFAT to ext4 for better Linux ACLs and stability.  
+- Move to Pi 5 + NVMe for compact, silent, fast storage.  
+- Implement active cooling mechanisms
 
