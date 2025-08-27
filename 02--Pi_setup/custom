@@ -1,1 +1,41 @@
+# Custom OS Configuration
+
+## Step 1: Preparing the SD Card
+- Insert the microSD card into an SD card reader and connect it to the PC.
+- Open File Explorer and identify the SD card drive.
+- Delete all existing partitions or files if any are present.
+- Format the SD card:
+  - Use FAT32 file system.
+  - Assign a simple label (e.g., `PI_BOOT`).
+  - Perform a quick format.
+
+## Step 2: Flashing the OS Image
+- Download and install **Raspberry Pi Imager** on your PC.
+- Launch the tool and follow these steps:
+  1. Click **Choose OS** → select `Raspberry Pi OS (32-bit) with desktop`.
+  2. Click **Choose Storage** → select your SD card drive.
+  3. Click the **gear icon (settings)** to open advanced options.
+
+## Step 3: Configuring Advanced Options in Imager
+- In the **General** section:
+  - Set a unique hostname (example: `pi-main`).
+  - Create a username and password for login.
+  - Configure Wi-Fi by entering:
+    - SSID (local Wi-Fi network name).
+    - Password (Wi-Fi password).
+    - Wireless LAN country → `IN` (for India).
+  - Choose your **Timezone** (India Standard Time).
+  - Select keyboard layout.
+
+- In the **Services** section:
+  - Enable SSH (tick the box).
+  - Select **Use password authentication**.
+
+- In the **Options** section:
+  - Enable "Play sound when finished".
+  - Enable "Eject media when finished".
+  - Enable "Enable telemetry".
+
+- Save the settings and click **Write** to start flashing.
+- Wait until the process completes and the media is ejected automatically.
 
