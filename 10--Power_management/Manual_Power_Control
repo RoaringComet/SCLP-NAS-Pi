@@ -1,0 +1,22 @@
+# Manual Power Control  
+
+Manual power control ensures safe startup and shutdown when automation is not desirable.  
+
+## Methods of Control  
+1. **Desktop Batch Files**  
+   - One-click shutdown (`shutdown-nas.bat`).  
+   - One-click startup possible with Wake-on-LAN (if supported).  
+
+2. **SSH Commands**  
+   - `ssh pi@<ip> sudo shutdown now` for remote shutdown.  
+   - Useful when batch files are not configured.  
+
+3. **Physical Switch**  
+   - USB power switch or smart plug can cut power manually.  
+   - Must only be used after proper shutdown to prevent HDD corruption.  
+
+## Best Practice  
+- Always unmount drives before cutting power.  
+- Maintain redundancy (backup scripts + physical switch).  
+
+**Outcome:** A hybrid approach (manual + automated) gives flexibility and ensures system safety.  
