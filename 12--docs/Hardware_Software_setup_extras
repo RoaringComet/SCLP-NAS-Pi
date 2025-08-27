@@ -1,0 +1,47 @@
+# Hardware and Software Setup for Raspberry Pi NAS
+
+This guide combines hardware preparation and software installation for a functional NAS.
+
+## 1. Hardware Setup
+1. Insert the microSD card (flashed with Raspberry Pi OS) into the Pi.
+2. Place the Pi in a case with passive cooling or fan.
+3. Connect Ethernet cable to router for stable network.
+4. Attach external storage (HDD/SSD) via USB 3.0 enclosure.
+5. Connect power supply (Official PSU recommended).
+
+## 2. Software Installation
+1. Boot the Pi with OS and complete initial configuration.
+2. Update packages:
+```bash
+sudo apt update && sudo apt full-upgrade -y
+Install essential packages:
+
+bash
+Copy code
+sudo apt install -y samba samba-common exfat-fuse exfatprogs ntfs-3g htop iotop smartmontools nano git curl wget
+Enable and configure SSH for headless access.
+
+yaml
+Copy code
+
+---
+
+### 📄 client-configuration.md + network-setup notes
+```markdown
+# Client Configuration and Network Setup
+
+## 1. Windows Access
+1. Find Pi IP using Advanced IP Scanner or router.
+2. Access Samba share via:
+   - Run Menu: \\<Pi_IP>\<Share_Name>
+   - Map Network Drive: assign a drive letter (e.g., Z:) and save credentials.
+
+## 2. Mobile Access
+- Install CX File Explorer (Android/iOS).
+- Add a new SMB connection using Pi IP, share name, username, and password.
+- Verify connection and access files.
+
+## 3. Network Notes
+- Prefer wired Ethernet for reliability.
+- Assign static IP or configure DHCP reservation.
+- Ensure firewall allows SMB ports (445, 139).
