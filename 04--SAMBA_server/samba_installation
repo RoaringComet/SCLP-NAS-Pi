@@ -1,0 +1,47 @@
+# Samba Installation and HDD Preparation
+
+## Step 1: Update system packages
+```bash
+sudo apt update && sudo apt upgrade -y
+Step 2: Install required packages
+exFAT support (for some drives), NTFS support, and Samba itself
+bash
+Copy code
+sudo apt install exfat-utils exfat-fuse ntfs-3g samba samba-common-bin -y
+Step 3: Connect external HDD to Raspberry Pi
+After plugging in, check available devices
+bash
+Copy code
+lsblk
+Example output:
+sda 465.8G
+└─sda2 465.7G
+Note down your device (e.g. /dev/sda2)
+yaml
+Copy code
+
+---
+
+## Step 4: Unmount drive (if auto-mounted)
+```bash
+sudo umount /dev/sda2
+Step 5: Prepare for mounting
+Do NOT mount permanently yet (covered in directory-structure.md)
+Just confirm you can mount manually
+bash
+Copy code
+sudo mkdir -p /mnt/myhdd
+sudo mount /dev/sda2 /mnt/myhdd
+Verify
+bash
+Copy code
+ls /mnt/myhdd
+Step 6: Install check (verify Samba installed)
+bash
+Copy code
+smbd --version
+Output should show installed Samba version.
+
+
+
+
