@@ -1,0 +1,34 @@
+# Persistence Logic
+
+To make sure the NAS drive auto-mounts every time you log in, the `automount-nas.bat` script must be set to run automatically. There are two reliable methods:
+
+## 1. Startup Folder (Simple)
+1. Press **Win + R**, type `shell:startup`, and press Enter.
+2. Copy your `automount-nas.bat` file into this folder.
+3. On the next login, Windows will run the script automatically.
+
+✅ Best for single-user PCs.
+
+---
+
+## 2. Task Scheduler (Robust)
+1. Open **Task Scheduler** → *Create Task*.
+2. Under **General**:
+   - Run whether user is logged in or not.
+   - Check **Run with highest privileges**.
+3. Under **Triggers**:
+   - Add → *At log on*.
+4. Under **Actions**:
+   - New → *Start a program* → point to `automount-nas.bat`.
+5. Save and enter your Windows credentials.
+
+✅ Best for shared/multi-user PCs or servers.
+
+---
+
+## Why This Matters
+- Without persistence, mapped drives may disappear after reboot.  
+- Startup folder = quick setup.  
+- Task Scheduler = more reliable, especially with admin permissions.
+
+---
