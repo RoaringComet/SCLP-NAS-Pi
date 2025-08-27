@@ -1,0 +1,47 @@
+# Directory Structure & Mount Configuration
+
+## Step 1: Create a dedicated mount point
+```bash
+sudo mkdir -p /mnt/nas
+Step 2: Configure permanent mount in /etc/fstab
+Open fstab
+bash
+Copy code
+sudo nano /etc/fstab
+Add line at the bottom (replace with your device ID)
+For example: /dev/sda2 /mnt/nas ntfs-3g defaults,uid=1000,gid=1000 0 0
+Explanation:
+- /dev/sda2 : your HDD partition
+- /mnt/nas : mount location
+- ntfs-3g : filesystem type (change if exfat/ext4/etc.)
+- uid/gid : set ownership to your main user
+- defaults : standard mount options
+Save + exit.
+yaml
+Copy code
+
+---
+
+## Step 3: Test the mount
+```bash
+sudo mount -a
+ls /mnt/nas
+If you see HDD contents → mount successful.
+If error → recheck fstab entry.
+yaml
+Copy code
+
+---
+
+## Step 4: Set permissions for Samba use
+# Give read/write permission to your user
+```bash
+sudo chown -R pi:pi /mnt/nas
+sudo chmod -R 775 /mnt/nas
+Final Structure (example)
+swift
+Copy code
+/mnt/nas/           ← main HDD mount point
+/mnt/nas/public     ← public share
+/mnt/nas/private    ← private share
+These will be used in smb.conf later.
