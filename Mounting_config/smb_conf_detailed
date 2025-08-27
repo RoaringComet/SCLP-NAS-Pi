@@ -1,0 +1,231 @@
+# Samba Configuration (smb.conf) Detailed Guide
+
+## Overview
+The `/etc/samba/smb.conf` file controls how Samba shares your mounted drive with network devices. This configuration ensures Windows and mobile devices can access your NAS seamlessly.
+
+## Complete Configuration
+
+### Location
+```bash
+/etc/samba/smb.conf
+```
+
+### Our Working Configuration
+
+```ini
+# Global parameters - affects all shares
+[global]
+        log file = /var/log/samba/log.%m
+        logging = file
+        map to guest = Bad User
+        max log size = 1000
+        obey pam restrictions = Yes
+        pam password change = Yes
+        panic action = /usr/share/samba/panic-action %d
+        passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
+        passwd program = /usr/bin/passwd %u
+        server role = standalone server
+        unix password sync = Yes
+        usershare allow guests = Yes
+        idmap config * : backend = tdb
+
+# Home directories (default)
+[homes]
+        browseable = No
+        comment = Home Directories
+        create mask = 0700
+        directory mask = 0700
+        read only = No
+        valid users = %S
+
+# Printers (default)
+[printers]
+        browseable = No
+        comment = All Printers
+        create mask = 0700
+        path = /var/tmp
+        printable = Yes
+
+[print$]
+        comment = Printer Drivers
+        path = /var/lib/samba/printers
+
+# OUR NAS SHARE - This is what we configured
+[SoumyadeepNASpi]
+   comment = Soumyadeep's NAS home server
+   path = /sonunas
+   read only = no
+   browsable = yes
+   writable = yes
+   public = no
+   create mask = 0777
+   directory mask = 0777
+   valid users = soumyadeep
+   force user = soumyadeep
+   force group = soumyadeep
+```
+
+## Share Configuration Breakdown
+
+### Share Name
+```ini
+[SoumyadeepNASpi]
+```
+- **Purpose**: Name that appears in network browser
+- **Windows sees**: `\\192.168.0.113\SoumyadeepNASpi`
+- **Case sensitive**: Must match exactly in client connections
+
+### Basic Settings
+```ini
+comment = Soumyadeep's NAS home server
+path = /sonunas
+```
+- **`comment`**: Description shown in network browsers
+- **`path`**: Physical directory on Raspberry Pi (our mount point)
+
+### Access Control
+```ini
+read only = no
+browsable = yes
+writable = yes
+public = no
+valid users = soumyadeep
+```
+- **`read only = no`**: Allows write operations
+- **`browsable = yes`**: Share appears in network browsing
+- **`writable = yes`**: Explicitly allows writing (redundant with read only = no)
+- **`public = no`**: Requires authentication
+- **`valid users = soumyadeep`**: Only this user can access
+
+### Permission Masks
+```ini
+create mask = 0777
+directory mask = 0777
+```
+- **`create mask = 0777`**: New files get `rwxrwxrwx` permissions
+- **`directory mask = 0777`**: New directories get `rwxrwxrwx` permissions
+- **Why 0777**: Ensures no permission conflicts from any client
+
+### Force User/Group
+```ini
+force user = soumyadeep
+force group = soumyadeep
+```
+- **`force user`**: All operations appear as this user (regardless of client)
+- **`force group`**: All operations use this group
+- **Why needed**: Ensures consistency with mount UID/GID (1001)
+
+## Configuration Evolution
+
+### What We Tried First (Didn't Work)
+```ini
+# WRONG - had typo
+valid user = Soumyadeep    # Missing 's' in 'users'
+force user = pi           # Wrong user
+force group = users       # Wrong group
+```
+
+### Problems We Solved
+1. **Typo**: `valid user` → `valid users` (with 's')
+2. **Case mismatch**: `Soumyadeep` → `soumyadeep` (must match Linux username)
+3. **User mismatch**: `pi` → `soumyadeep` (must match mount UID)
+4. **Group mismatch**: `users` → `soumyadeep` (must match mount GID)
+
+## Testing the Configuration
+
+### 1. Validate Syntax
+```bash
+sudo testparm
+```
+Expected output:
+```
+Load smb config files from /etc/samba/smb.conf
+Loaded services file OK.
+Server role: ROLE_STANDALONE
+
+[SoumyadeepNASpi]
+        comment = Soumyadeep's NAS home server
+        create mask = 0777
+        directory mask = 0777
+        force group = soumyadeep
+        force user = soumyadeep
+        path = /sonunas
+        read only = No
+        valid users = soumyadeep
+```
+
+### 2. Test Local Access
+```bash
+smbclient -L localhost -U soumyadeep
+```
+Should show your share in the list.
+
+### 3. Test Network Access
+```bash
+smbclient //localhost/SoumyadeepNASpi -U soumyadeep
+```
+Should connect and allow file operations.
+
+## Service Management
+
+### Apply Configuration Changes
+```bash
+# Test configuration first
+sudo testparm
+
+# Restart services to apply changes
+sudo systemctl restart smbd
+sudo systemctl restart nmbd
+
+# Check service status
+sudo systemctl status smbd
+```
+
+### Enable Auto-Start
+```bash
+sudo systemctl enable smbd
+sudo systemctl enable nmbd
+```
+
+## Security Considerations
+
+### Current Security Level
+- ✅ **Authentication required**: `public = no`
+- ✅ **User restriction**: `valid users = soumyadeep`
+- ✅ **Network isolation**: Only accessible on local network
+- ⚠️ **High permissions**: 0777 masks (acceptable for home use)
+
+### Production Hardening (Optional)
+```ini
+# Tighter permissions for production
+create mask = 0664
+directory mask = 0775
+
+# Additional security
+hosts allow = 192.168.0.0/24
+hosts deny = ALL
+```
+
+## Troubleshooting
+
+### Common Errors in Logs
+```bash
+sudo tail -f /var/log/samba/log.smbd
+```
+
+### Permission Issues
+- Check mount UID matches force user
+- Verify file ownership in /sonunas
+- Test with `sudo -u soumyadeep touch /sonunas/test.txt`
+
+### Connection Issues
+- Verify share name spelling
+- Check valid users setting
+- Confirm user exists: `sudo pdbedit -L`
+
+## Next Steps
+After smb.conf is configured:
+1. Create/verify Samba user password
+2. Test from Windows client
+3. Test from mobile devices
+4. Set up automated connection scripts
