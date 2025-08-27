@@ -1,0 +1,95 @@
+Network Stability for Raspberry Pi NAS
+
+A stable network connection is critical for accessing the Raspberry Pi NAS reliably, especially when it’s mapped as a network drive. Below are methods and best practices to ensure long-term stability.
+
+1. Assign a Static IP
+
+Use /etc/dhcpcd.conf to configure a fixed IP for your Pi (see dhcpcd-configuration.md
+).
+
+Avoids the problem of IPs changing on reboot or DHCP lease renewal.
+
+Example: 192.168.0.105 for eth0.
+
+2. Prefer Wired Ethernet over Wi-Fi
+
+Use eth0 whenever possible — more stable, lower latency, less packet loss.
+
+If Wi-Fi must be used:
+
+Place router and Pi close together.
+
+Use the 5 GHz band for faster and less congested connections.
+
+Lock the Pi to a specific SSID in /etc/wpa_supplicant/wpa_supplicant.conf.
+
+3. Power Supply Reliability
+
+Use a high-quality 5V/3A+ power adapter for the Pi.
+
+Inadequate power can cause network drops, throttling, and USB disconnects.
+
+Check for warnings:
+
+dmesg | grep voltage
+
+4. Router & DHCP Settings
+
+Ensure your router DHCP range does not conflict with the Pi’s static IP.
+
+Reserve the Pi’s IP in router DHCP settings (called "DHCP reservation" or "IP binding").
+
+Keep DNS stable (Google 8.8.8.8, Cloudflare 1.1.1.1).
+
+5. Enable Auto-Reconnect Services
+
+If network drops, configure services to auto-reconnect:
+
+For Wi-Fi:
+
+Edit /etc/wpa_supplicant/wpa_supplicant.conf:
+
+network={
+    ssid="YourSSID"
+    psk="YourPassword"
+    key_mgmt=WPA-PSK
+    scan_ssid=1
+    priority=1
+}
+
+Add Auto-Reconnect via Cron:
+crontab -e
+
+
+Add:
+
+*/5 * * * * ping -c 1 8.8.8.8 || sudo systemctl restart dhcpcd
+
+
+👉 Checks connection every 5 min; restarts network if offline.
+
+6. Monitor Network Health
+
+Check logs:
+
+journalctl -u dhcpcd --no-pager | tail -n 50
+
+
+Monitor latency:
+
+ping google.com
+
+
+Check Samba status:
+
+systemctl status smbd
+
+7. Keep Software Updated
+sudo apt update && sudo apt upgrade -y
+
+
+Security patches prevent crashes and vulnerabilities.
+
+Update Samba to latest version for better stability.
+
+✅ Following these steps will make your Raspberry Pi NAS connection rock-solid and ensure that mapped drives (like your Z: drive) don’t disappear unexpectedly.
