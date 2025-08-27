@@ -1,1 +1,69 @@
+# Networking Setup
+
+Your NAS must be reachable reliably on the home/office network. By default, Raspberry Pi gets a dynamic IP via DHCP, but for consistent access you should configure a static IP or DHCP reservation.
+
+---
+
+## 1) Accessing Pi via Network
+
+- Connect Raspberry Pi to router/switch using Ethernet (recommended for speed and stability).  
+- Find Pi’s IP address:  
+  - Check router’s DHCP client list, or  
+  - Run `arp -a` on Windows, or  
+  - Use `hostname -I` on the Pi itself.
+
+---
+
+## 2) Setting a Static IP (Method 1: via Router)
+
+- Go to your router’s admin panel.  
+- Bind the Pi’s MAC address to a fixed IP (DHCP reservation).  
+- Easiest and most reliable method, survives OS reinstall.
+
+---
+
+## 3) Setting a Static IP (Method 2: on Raspberry Pi)
+
+Edit the DHCP client configuration file:
+
+```bash
+sudo nano /etc/dhcpcd.conf
+
+
+Add at the end (replace with your network values):
+
+interface eth0
+static ip_address=192.168.1.50/24
+static routers=192.168.1.1
+static domain_name_servers=192.168.1.1 8.8.8.8
+
+Then reboot:
+
+sudo reboot
+
+Ping the Pi from your PC:
+
+ping 192.168.1.50
+
+
+SSH into the Pi:
+
+ssh pi@192.168.1.50
+
+
+From Windows, test Samba share access later via:
+
+\\192.168.1.50\ (remember this is a dummy IP !)
+
+
+
+
+
+# OTHER NETWORK STUFFS THAT ARE OBVIOUS 
+
+## 1) A valid and running local Wi-Fi (the server will be hosted on this)
+
+## 2) SAMBA server (we will use powershell to directly install that on the Pi)
+
+that's it :)
 
