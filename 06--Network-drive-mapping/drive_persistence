@@ -1,0 +1,99 @@
+Drive Persistence on Windows
+
+Mapping a network drive to your Raspberry Pi Samba share is useful, but by default it may disconnect after reboot. This guide shows how to make the drive persistent.
+
+1. Using the GUI (Map Network Drive with Reconnect)
+
+Open This PC → click Map network drive.
+
+Select a letter (e.g., Z:).
+
+Enter path:
+
+\\<Pi_IP_Address>\<Share_Name>
+
+
+✅ Tick Reconnect at sign-in.
+
+Enter Samba credentials.
+
+The drive will reconnect automatically after reboot.
+
+[screenshot: persistence-gui]
+
+2. Save Credentials in Windows
+
+If you don’t want to enter the Samba username/password each time:
+
+Open Control Panel → Credential Manager.
+
+Choose Windows Credentials → Add a Windows credential.
+
+Enter:
+
+Internet address: \\<Pi_IP_Address>
+
+Username: Samba user (e.g., soumyadeep)
+
+Password: Your Samba password
+
+Now, the drive will connect without prompting.
+
+[screenshot: credential-manager]
+
+3. Command Prompt – Persistent net use
+
+Use /persistent:yes with net use:
+
+net use Z: \\<Pi_IP_Address>\<Share_Name> /user:<smb_username> /persistent:yes
+
+
+The /persistent:yes flag ensures the mapping survives reboot.
+
+Example:
+
+net use Z: \\192.168.0.105\SoumyadeepNASPi /user:soumyadeep /persistent:yes
+
+4. PowerShell – Persistent New-PSDrive
+
+PowerShell needs the -Persist flag:
+
+New-PSDrive -Name "Z" -PSProvider FileSystem -Root "\\<Pi_IP_Address>\<Share_Name>" -Credential (Get-Credential) -Persist
+
+
+Stores credentials (if saved in Credential Manager).
+
+Survives reboots.
+
+5. Startup Script Method (Advanced)
+
+If persistence still fails, create a startup script:
+
+Open Notepad and paste:
+
+@echo off
+net use Z: \\<Pi_IP_Address>\<Share_Name> /user:<smb_username> /persistent:yes
+exit
+
+
+Save as map-drive.bat.
+
+Place in:
+
+C:\Users\<YourUser>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+
+
+Script runs at login → drive remaps automatically.
+
+6. Troubleshooting
+
+Mapped drive not reconnecting → Check “Reconnect at sign-in” was ticked.
+
+Credential prompt keeps appearing → Re-add credentials in Credential Manager.
+
+Wrong user context → Ensure the script is under your account’s startup folder.
+
+Network not ready at boot → Add a delay to batch file:
+
+timeout /t 10
+net use Z: \\<Pi_IP_Address>\<Share_Name> /user:<smb_username> /persistent:yes
