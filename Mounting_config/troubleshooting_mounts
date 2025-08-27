@@ -1,0 +1,388 @@
+# Troubleshooting Mount Issues
+
+## Overview
+This guide covers common mounting problems encountered during NAS setup and their solutions. Most issues stem from file system detection, permission mismatches, or service conflicts.
+
+## Problem Categories
+
+### 1. File System Detection Issues
+### 2. Permission and Ownership Problems  
+### 3. Service Conflicts
+### 4. Device and Hardware Issues
+### 5. Network and Client Problems
+
+---
+
+## 1. File System Detection Issues
+
+### Problem: NTFS Signature Missing
+```bash
+sudo mount -t ntfs-3g -o uid=1001,gid=1001,umask=002 /dev/sda2 /sonunas
+NTFS signature is missing.
+Failed to mount '/dev/sda2': Invalid argument
+```
+
+**Root Cause:** Assuming wrong file system type
+
+**Diagnosis:**
+```bash
+sudo blkid /dev/sda2
+sudo file -s /dev/sda2
+```
+
+**Example Output:**
+```bash
+/dev/sda2: LABEL="My Book" UUID="62CC-A86F" TYPE="exfat"
+```
+
+**Solution:**
+```bash
+# Use correct file system type
+sudo mount -t exfat -o uid=1001,gid=1001,umask=002 /dev/sda2 /sonunas
+```
+
+### Problem: Wrong Device Selection
+```bash
+mount: /dev/sda: wrong fs type, bad option, bad superblock
+```
+
+**Root Cause:** Using whole disk instead of partition
+
+**Diagnosis:**
+```bash
+lsblk
+```
+**Expected Output:**
+```bash
+sda           8:0    0 931.5G  0 disk
+├─sda1        8:1    0    16M  0 part    # Boot partition
+└─sda2        8:2    0 931.5G  0 part    # Data partition ← Use this one
+```
+
+**Solution:**
+```bash
+# Use partition (sda2), not whole disk (sda)
+sudo mount -t exfat -o uid=1001,gid=1001,umask=002 /dev/sda2 /sonunas
+```
+
+---
+
+## 2. Permission and Ownership Problems
+
+### Problem: Permission Denied After Mount
+```bash
+touch /sonunas/test.txt
+touch: cannot touch '/sonunas/test.txt': Permission denied
+```
+
+**Root Cause:** UID/GID mismatch between mount and user
+
+**Diagnosis:**
+```bash
+# Check current mount
+mount | grep sonunas
+# Check user ID
+id soumyadeep
+# Check file ownership
+ls -la /sonunas
+```
+
+**Example Issue:**
+```bash
+# Mount shows uid=1000 (pi user)
+/dev/sda2 on /sonunas type exfat (uid=1000,gid=1000...)
+
+# But Samba user is uid=1001
+id soumyadeep
+uid=1001(soumyadeep) gid=1001(soumyadeep)
+```
+
+**Solution:**
+```bash
+# Unmount and remount with correct UID
+sudo umount /sonunas
+sudo mount -t exfat -o uid=1001,gid=1001,umask=002 /dev/sda2 /sonunas
+```
+
+### Problem: Root Ownership Despite Mount Options
+```bash
+ls -la /sonunas
+drwxr-xr-x 3 root root 262144 Aug 24 19:40 .
+```
+
+**Root Cause:** File system doesn't support Unix permissions
+
+**Diagnosis:**
+```bash
+# Check if mount options were applied
+mount | grep sonunas
+```
+
+**If mount shows correct UID but files still show root:**
+- File system may not support ownership (some FAT variants)
+- Mount may have failed silently
+
+**Solution:**
+```bash
+# Force remount with different options
+sudo umount /sonunas
+sudo mount -t exfat -o uid=1001,gid=1001,umask=000,rw,exec /dev/sda2 /sonunas
+```
+
+---
+
+## 3. Service Conflicts
+
+### Problem: Device Busy During Unmount
+```bash
+sudo umount /sonunas
+umount: /sonunas: target is busy.
+```
+
+**Root Cause:** Samba or other process using the mount point
+
+**Diagnosis:**
+```bash
+# Find what's using the mount
+sudo fuser -m /sonunas
+sudo lsof /sonunas
+```
+
+**Example Output:**
+```bash
+COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+smbd    2024 root  cwd    DIR    8,2   262144    1 /sonunas
+```
+
+**Solution:**
+```bash
+# Stop services using the mount
+sudo systemctl stop smbd
+sudo systemctl stop nmbd
+
+# Now unmount should work
+sudo umount /sonunas
+
+# Remount with correct options
+sudo mount -t exfat -o uid=1001,gid=1001,umask=002 /dev/sda2 /sonunas
+
+# Restart services
+sudo systemctl start smbd
+sudo systemctl start nmbd
+```
+
+### Problem: Exclusive Lock Error
+```bash
+Mount is denied because the NTFS volume is already exclusively opened.
+```
+
+**Root Cause:** Previous mount attempt left locks
+
+**Solution:**
+```bash
+# Force unmount
+sudo umount -l /sonunas  # Lazy unmount
+
+# Or kill processes and unmount normally
+sudo fuser -km /sonunas
+sudo umount /sonunas
+```
+
+---
+
+## 4. Device and Hardware Issues
+
+### Problem: Device Not Found
+```bash
+mount: /dev/sda2: can't find in /etc/fstab.
+```
+
+**Root Cause:** Device name changed or drive not connected
+
+**Diagnosis:**
+```bash
+# Check if device exists
+lsblk
+dmesg | tail -20  # Check for hardware errors
+```
+
+**If drive disappeared:**
+```bash
+# Check USB connections
+lsusb
+# Check system messages
+sudo dmesg | grep -i usb
+```
+
+**Solution:**
+```bash
+# Reconnect drive physically
+# Check new device name
+lsblk
+# Update mount command with correct device
+sudo mount -t exfat -o uid=1001,gid=1001,umask=002 /dev/sdb2 /sonunas
+```
+
+### Problem: Drive Powers Down
+**Root Cause:** USB power management or drive sleep
+
+**Solution:**
+```bash
+# Disable USB autosuspend for external drives
+echo 'ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1058", ATTR{power/autosuspend}="-1"' | sudo tee /etc/udev/rules.d/99-usb-power.rules
+
+# Or mount with keep-alive options
+sudo mount -t exfat -o uid=1001,gid=1001,umask=002,noatime /dev/sda2 /sonunas
+```
+
+---
+
+## 5. Network and Client Problems
+
+### Problem: Windows Can't Access After Remount
+**Symptoms:** Mount works, Samba runs, but Windows shows "Access Denied"
+
+**Root Cause:** Samba user permissions don't match mount ownership
+
+**Diagnosis:**
+```bash
+# Check mount ownership
+ls -la /sonunas/
+# Check Samba config
+sudo testparm | grep -A 10 SoumyadeepNASpi
+# Test file creation as Samba user
+sudo -u soumyadeep touch /sonunas/samba-test.txt
+```
+
+**Solution:**
+```bash
+# Ensure consistency between mount UID and Samba user
+id soumyadeep  # Note the UID
+sudo umount /sonunas
+sudo mount -t exfat -o uid=1001,gid=1001,umask=002 /dev/sda2 /sonunas  # Use correct UID
+sudo systemctl restart smbd
+```
+
+### Problem: Mobile Apps Can't Connect
+**Symptoms:** Windows works, but Android/iOS apps fail
+
+**Diagnosis:**
+```bash
+# Check Samba is listening on all interfaces
+sudo netstat -tlnp | grep :445
+# Check firewall
+sudo ufw status
+```
+
+**Solution:**
+```bash
+# Ensure Samba listens on all interfaces
+sudo nano /etc/samba/smb.conf
+# Add to [global] section:
+interfaces = 0.0.0.0
+bind interfaces only = no
+```
+
+---
+
+## Diagnostic Commands Reference
+
+### System Information
+```bash
+# Hardware detection
+lsblk                          # Block devices
+sudo blkid                     # File system info
+lsusb                         # USB devices
+dmesg | tail -20              # Recent system messages
+
+# Mount information  
+mount | grep sonunas          # Current mounts
+df -h                         # Disk usage
+sudo fuser -m /sonunas        # Processes using mount
+
+# Permission checking
+id soumyadeep                 # User ID info
+ls -la /sonunas/             # File permissions
+sudo -u soumyadeep touch /sonunas/test.txt  # Test as user
+```
+
+### Service Status
+```bash
+# Samba services
+sudo systemctl status smbd
+sudo systemctl status nmbd
+sudo testparm                 # Config validation
+
+# System services
+sudo systemctl status systemd-remount-fs
+sudo journalctl -u smbd       # Samba logs
+```
+
+---
+
+## Prevention Strategies
+
+### 1. Document Working Configuration
+```bash
+# Save working mount command
+echo "sudo mount -t exfat -o uid=1001,gid=1001,umask=002 /dev/sda2 /sonunas" > ~/mount-nas.sh
+
+# Backup working configs
+sudo cp /etc/fstab /etc/fstab.working
+sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.working
+```
+
+### 2. Create Validation Script
+```bash
+#!/bin/bash
+# nas-health-check.sh
+echo "=== NAS Health Check ==="
+echo "1. Mount status:"
+mount | grep sonunas
+echo "2. File permissions:"
+ls -la /sonunas/ | head -3
+echo "3. Samba services:"
+systemctl is-active smbd nmbd
+echo "4. Test file creation:"
+sudo -u soumyadeep touch /sonunas/health-check.txt && echo "✓ Success" || echo "✗ Failed"
+rm -f /sonunas/health-check.txt
+```
+
+### 3. Monitor for Issues
+```bash
+# Add to crontab for regular checks
+# crontab -e
+0 */6 * * * /home/pi/nas-health-check.sh >> /var/log/nas-check.log
+```
+
+---
+
+## Recovery Procedures
+
+### Complete Reset (Last Resort)
+```bash
+# 1. Stop all services
+sudo systemctl stop smbd nmbd
+
+# 2. Unmount everything
+sudo umount /sonunas 2>/dev/null || sudo umount -l /sonunas
+
+# 3. Check hardware
+lsblk
+sudo blkid /dev/sda2
+
+# 4. Clean mount
+sudo mount -t exfat -o uid=1001,gid=1001,umask=002 /dev/sda2 /sonunas
+
+# 5. Test basic function
+sudo -u soumyadeep touch /sonunas/recovery-test.txt
+ls -la /sonunas/recovery-test.txt
+
+# 6. Restart services
+sudo systemctl start smbd nmbd
+
+# 7. Test from clients
+```
+
+### Backup and Restore Data
+```bash
