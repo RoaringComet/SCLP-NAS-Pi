@@ -1,0 +1,22 @@
+# Startup Automation Decision  
+
+A critical design choice is whether the NAS should **auto-start on boot** or require **manual startup**.  
+
+## Auto-Start Pros  
+- Immediate availability when power is restored.  
+- Hands-off convenience for 24/7 NAS operations.  
+
+## Auto-Start Cons  
+- Increased wear on HDDs if power outages are frequent.  
+- May restart during unstable power conditions, risking corruption.  
+
+## Manual Start Pros  
+- Controlled startup reduces stress on hardware.  
+- Admin can check system health before bringing services online.  
+
+## Manual Start Cons  
+- Requires user intervention after every reboot.  
+- Less convenient for remote-only access.  
+
+**Conclusion:** In most home NAS setups, enabling auto-start is beneficial if paired with a UPS. For sensitive drives, manual start may be preferable.  
+// i used manual boot as it gives better control and less uncertainity//
