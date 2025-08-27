@@ -1,0 +1,72 @@
+# Headless Access Guide
+
+This guide explains how to access your Raspberry Pi **headlessly** (without connecting a monitor, keyboard, or mouse).
+
+---
+
+## 1. Prerequisites
+
+- A Raspberry Pi with Raspberry Pi OS (32-bit Desktop version).
+- MicroSD card flashed with Raspberry Pi Imager and pre-configured (hostname, username, Wi-Fi, SSH enabled).
+- Your local Wi-Fi network SSID and password configured during flashing.
+- Advanced IP Scanner (or similar tool) installed on your PC to find the Pi’s IP address.
+
+---
+
+## 2. Finding the Raspberry Pi IP Address
+
+1. Connect your Raspberry Pi to power.  
+   It will boot and connect to the Wi-Fi network set during configuration.  
+
+2. Open **Advanced IP Scanner** (or another network scanner) on your PC.  
+
+3. Scan your local network and locate the entry corresponding to the Pi.  
+   - It will usually show up as `raspberrypi` or with the hostname you set.  
+   - Note down the IP address, e.g., `<your Pi IP>`.
+
+---
+
+## 3. Headless SSH Access
+
+1. On your PC, open a terminal (Linux/macOS) or PowerShell (Windows).  
+
+2. Run the following command to connect:
+
+   ```bash
+   ssh pi@<your Pi IP>
+
+Replace pi with your Pi’s username (if different).
+
+Replace <your Pi IP> with the actual IP address you found.
+
+Enter the password you set during Raspberry Pi Imager configuration.
+
+If successful, you will see the Raspberry Pi shell prompt:
+
+pi@raspberrypi:~ $
+
+4. Verifying Connectivity
+
+Before SSH, you can verify the Pi is reachable:
+
+ping <your Pi IP>
+
+
+A successful response means the Pi is online.
+
+5. Post-Login Steps
+
+Once logged in via SSH:
+
+Update packages immediately:
+
+sudo apt update && sudo apt upgrade -y
+
+
+Confirm your hostname:
+
+hostname
+
+
+You are now fully connected to your Raspberry Pi headlessly.
+
