@@ -1,1 +1,23 @@
+# System Optimization
+
+This file serves as a placeholder for general optimization notes.
+
+## Performance Tweaks
+- Adjust GPU memory split if using desktop or graphics-heavy tasks.
+- Disable unused interfaces (e.g., SPI, I2C, camera) via `raspi-config`.
+- Consider enabling zram for better memory management.
+
+## Reliability Tweaks
+- Reduce SD card write cycles:
+  - Use `tmpfs` for logs or cache.
+  - Disable swap if not required.
+- Disable HDMI output if running headless.
+
+## Power Saving
+- Optionally turn off onboard LEDs for lower power consumption.
+- Tweak Wi-Fi power management settings for efficiency.
+
+## Notes
+- Actual optimization strategy will depend on the final project requirements.
+- More specific tuning to be added after testing workloads.
 
