@@ -1,0 +1,15 @@
+# Troubleshooting Common NAS Issues
+
+## Connection Issues
+- Cannot ping Pi: check network, cable, and static IP.
+- Drive mapping fails: verify Samba service, username, and password.
+
+## Permission Issues
+- Access denied: confirm Samba user exists (`sudo smbpasswd -a <username>`) and folder permissions.
+
+## Mounting Issues
+- Auto-mount scripts fail: check script path, credentials, and SSH key setup.
+
+## Performance
+- Slow transfers: ensure USB 3.0 enclosure, avoid shared Wi-Fi, and check CPU load.
+
