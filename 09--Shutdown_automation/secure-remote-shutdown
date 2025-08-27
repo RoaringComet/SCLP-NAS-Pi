@@ -1,0 +1,43 @@
+Secure Remote Shutdown with Public Key Authentication
+
+We combine SSH key authentication with a simple .bat file to securely power off the Raspberry Pi NAS from Windows.
+
+Why Public Key?
+
+No password prompts during automation.
+
+More secure than storing passwords in scripts.
+
+Convenient for 1-click actions.
+
+Step 1: Ensure passwordless SSH is working
+
+Follow steps in passwordless-ssh.md.
+
+Step 2: Write the shutdown script
+
+Create a file named shutdown-nas.bat on your Windows Desktop:
+
+@echo off
+echo Sending shutdown command to Raspberry Pi NAS...
+ssh <username>@<pi-ip> "sudo shutdown now"
+pause
+
+Step 3: Allow shutdown without sudo password
+
+On Raspberry Pi, edit sudoers file:
+
+sudo visudo
+
+
+Add the line:
+
+<username> ALL=(ALL) NOPASSWD: /sbin/shutdown
+
+Step 4: Test it
+
+Double click shutdown-nas.bat on your Desktop.
+
+The Pi will shutdown instantly without asking for a password.
+
+✅ Result: A beautiful 1-click remote shutdown button for your Raspberry Pi NAS.
