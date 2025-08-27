@@ -1,0 +1,58 @@
+# Testing Samba Server
+
+After completing installation, directory setup, user creation, and `smb.conf` configuration, use the following steps to test your Samba server.
+
+---
+
+## 1. Restart Samba Services
+```bash
+sudo systemctl restart smbd nmbd
+sudo systemctl enable smbd nmbd
+2. Check Samba Status
+bash
+Copy code
+systemctl status smbd
+systemctl status nmbd
+✅ Both services should show as active (running).
+
+3. Test Configuration File
+bash
+Copy code
+testparm
+✅ Confirms that your /etc/samba/smb.conf file is valid.
+
+4. Local Access Test
+bash
+Copy code
+smbclient -L localhost -U nasuser
+Enter your Samba password.
+
+Should display list of shares (e.g., Public, NASUser).
+
+5. Windows Access
+Open File Explorer.
+
+In the address bar type:
+
+php-template
+Copy code
+\\<your Pi IP>
+You should see your shared folders.
+
+Double-click and enter Samba username & password if required.
+
+6. Linux Access
+bash
+Copy code
+smbclient //"<your Pi IP>"/Public -U nasuser
+or mount:
+
+bash
+Copy code
+sudo mount -t cifs //<your Pi IP>/NASUser /mnt/test -o username=nasuser
+7. Common Issues
+Permission denied → Check valid users in smb.conf and file system ownership (ls -l).
+
+Cannot see shares from Windows → Ensure port 445/139 is open (sudo ufw allow samba).
+
+Read-only access → Check read only = no, create mask, and directory mask.
