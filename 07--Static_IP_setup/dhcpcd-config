@@ -1,0 +1,52 @@
+dhcpcd Configuration for Static IP (Raspberry Pi)
+
+The dhcpcd service controls IP assignment on Raspberry Pi OS. By editing its configuration file, you can assign a static IP address to ensure your Pi always uses the same address on the network.
+
+1. Open dhcpcd.conf
+sudo nano /etc/dhcpcd.conf
+
+2. Add Static IP Settings
+
+Scroll to the bottom and add (adjust values for your network):
+
+For Ethernet (eth0):
+interface eth0
+static ip_address=192.168.0.105/24
+static routers=192.168.0.1
+static domain_name_servers=8.8.8.8 8.8.4.4
+
+For Wi-Fi (wlan0):
+interface wlan0
+static ip_address=192.168.0.110/24
+static routers=192.168.0.1
+static domain_name_servers=1.1.1.1 8.8.8.8
+
+3. Explanation of Fields
+
+interface → Network interface (eth0 = Ethernet, wlan0 = Wi-Fi).
+
+static ip_address → Desired IP address + subnet (e.g., /24 = 255.255.255.0).
+
+static routers → Gateway IP (usually your router’s IP, e.g., 192.168.0.1).
+
+static domain_name_servers → DNS servers (Google: 8.8.8.8, Cloudflare: 1.1.1.1).
+
+4. Restart Networking
+sudo systemctl restart dhcpcd
+
+
+Or reboot:
+
+sudo reboot
+
+5. Verify
+
+Check assigned IP:
+
+hostname -I
+
+
+Confirm connectivity:
+
+ping 192.168.0.1
+ping google.com
