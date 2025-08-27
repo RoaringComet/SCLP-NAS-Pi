@@ -1,1 +1,32 @@
+# 01. Project Overview
+
+## Introduction
+This project sets up a Raspberry Pi-based Network Attached Storage (NAS), enabling centralized file storage and sharing across multiple devices on a local network. 
+The added goal is to add script based power cutoff and automatic remounting on boot feature to make it more power efficient.
+The aim is to create a low-cost, flexible, and customizable NAS solution for personal or small-scale use.
+
+## Objectives
+- Build a NAS using a Raspberry Pi and an external storage device.  
+- Provide reliable file storage accessible from multiple clients (Windows, Linux, mobile).  
+- Ensure secure access control with user authentication.  
+- Optimize for simplicity, low power consumption, and scalability.  
+- Add a mounting script on the main client (laptop) to optimise connecting procedure
+- Add a shutdown script to remotely and safely turn off the Pi when not in use.
+
+## Features
+- Centralized storage accessible over SMB/CIFS protocol.  
+- User authentication with controlled read/write permissions.  
+- Persistent network drive mounting for seamless client access.  
+- Lightweight, low-power Raspberry Pi server operation.  
+- Remote shutdown using scripts
+
+## Why Raspberry Pi NAS?
+- Affordable hardware compared to dedicated NAS systems.  
+- Full control over configurations and software.  
+- Great learning project covering networking, storage systems, and server setup.  
+- Easily expandable with more external hard drives or SSDs.  
+- Practical usecase of being a centralised data storage centre in local network
+- Good exposure to powershell scripting (for windows)
+
+---
 
